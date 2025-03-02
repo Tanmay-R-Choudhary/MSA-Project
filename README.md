@@ -14,3 +14,8 @@ Endpoints:
 - /notifications/unread: Fetch all the unread notifications of a client from the database.
 - /notifications/mark-as-read/{id}: Mark the notification as read by the user.
 - ws:\<domain\>:\<port\>:ws/websocket: Used to connect to the server to receive notifications intended for the user in real time.
+
+### Grade Management Service
+Endpoints:
+- /api/grades/semester/{semester}: get grades of user for specific semester.
+- /api/grades/semester/{semester}/course/{course}: get grades of user for specific semester and course
