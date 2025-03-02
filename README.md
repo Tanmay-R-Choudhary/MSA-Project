@@ -1,5 +1,5 @@
 # University Management Application
-This application would be responsible for user management, academic management, sending notifications (real-time and stored in database), monitoring health of all microservices.
+This application would be responsible for user management, academic management, sending notifications (real-time and stored in database), and monitoring health of all microservices.
 
 ## Microservices
 ### User Management Service
