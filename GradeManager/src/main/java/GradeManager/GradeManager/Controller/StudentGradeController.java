@@ -4,9 +4,12 @@ import GradeManager.GradeManager.DTO.CourseGradesDTO;
 import GradeManager.GradeManager.Service.StudentGradeService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -16,12 +19,16 @@ public class StudentGradeController {
     @Autowired
     private StudentGradeService studentGradeService;
 
-    // Helper to get user's SAP ID from user ID in token
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${notification.service.url}")
+    private String notificationServiceUrl;
+
+
+
     private Integer getSapIdFromRequest(HttpServletRequest request) {
-        Integer userId = (Integer) request.getAttribute("userId");
-        // In a real application, you would look up the student's SAP ID using the userId
-        // For simplicity, we'll assume userId is the SAP ID
-        return userId;
+        return (Integer) request.getAttribute("userId");
     }
 
     @GetMapping("/semester/{semester}")
@@ -55,5 +62,23 @@ public class StudentGradeController {
         }
 
         return ResponseEntity.ok(grades);
+    }
+
+    @PostMapping("/triggerNotification")
+    public ResponseEntity<String> triggerNotification(HttpServletRequest request) {
+        Integer studentId = getSapIdFromRequest(request);
+        String message = "This is a test notification from Academic Manager, triggered by student ID: " + studentId;
+
+        String url = UriComponentsBuilder.fromHttpUrl(notificationServiceUrl + "/notifications/send")
+                .queryParam("userId", Long.valueOf(studentId))
+                .queryParam("message", message)
+                .toUriString();
+
+        try {
+            String response = restTemplate.postForObject(url, null, String.class);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error sending notification: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
