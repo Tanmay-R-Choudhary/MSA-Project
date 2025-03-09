@@ -14,7 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/grades")
+@RequestMapping("/grades")
 public class StudentGradeController {
     @Autowired
     private StudentGradeService studentGradeService;

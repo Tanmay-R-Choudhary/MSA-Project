@@ -4,6 +4,8 @@ import com.example.AcademicManagement.Entity.AttendanceRecord;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder; // Import UriComponent
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/attendance")
+@RequestMapping("/attendance")
 public class AttendanceController {
 
     @Autowired
@@ -64,17 +66,19 @@ public class AttendanceController {
     }
 
     @PostMapping("/triggerNotification")
-    public ResponseEntity<String> triggerNotification(HttpServletRequest request) {
-        Integer studentId = getStudentIdFromRequest(request);
+    public ResponseEntity<String> triggerNotification(@RequestAttribute("userId") Long studentId, @RequestHeader("Authorization") String token) {
         String message = "This is a test notification from Academic Manager, triggered by student ID: " + studentId;
 
         String url = UriComponentsBuilder.fromHttpUrl(apiGatewayUrl + "/notifications/send")
-                .queryParam("userId", Long.valueOf(studentId))
                 .queryParam("message", message)
                 .toUriString();
 
         try {
-            String response = restTemplate.postForObject(url, null, String.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + token);
+            HttpEntity<String> entity = new HttpEntity<>(null, headers);
+
+            String response = restTemplate.postForObject(url, entity, String.class);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Error sending notification: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

@@ -10,7 +10,7 @@ import project.UserManagement.Security.JwtUtil;
 import project.UserManagement.Service.UserService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/auth")
 public class UserController {
 
     @Autowired
@@ -19,7 +19,7 @@ public class UserController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @PostMapping("/auth/login")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         User user = userService.authenticateUser(loginRequest.getUsername(), loginRequest.getPassword());
 
@@ -35,14 +35,14 @@ public class UserController {
     }
 
 
-    @PostMapping("/users")
+    @PostMapping("/user")
     public ResponseEntity<User> createUser(@RequestBody User user) {
         User savedUser = userService.createUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
 
-    @PutMapping("/users/{userId}")
+    @PutMapping("/user/{userId}")
     public ResponseEntity<User> updateUser(@PathVariable("userId") int userId, @RequestBody User User) {
         User.setUserId(userId);
         User updatedUser = userService.updateUser(User);
@@ -53,7 +53,7 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/users/{userId}")
+    @DeleteMapping("/user/{userId}")
     public ResponseEntity<User> deleteUser(@PathVariable("userId") int userId) {
         userService.deleteUser(userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

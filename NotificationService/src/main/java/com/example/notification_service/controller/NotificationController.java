@@ -16,7 +16,7 @@ public class NotificationController {
 
     @PostMapping("/send")
     public String sendNotification(
-            @RequestParam Long userId,
+            @RequestAttribute("userId") Long userId,
             @RequestParam String message) {
         notificationService.sendNotification(userId, message);
         return "In-app notification sent successfully!";
