@@ -23,8 +23,8 @@ public class AttendanceController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${notification.service.url}")
-    private String notificationServiceUrl;
+    @Value("${api.gateway.url}")
+    private String apiGatewayUrl;
 
 
     private Integer getStudentIdFromRequest(HttpServletRequest request) {
@@ -68,7 +68,7 @@ public class AttendanceController {
         Integer studentId = getStudentIdFromRequest(request);
         String message = "This is a test notification from Academic Manager, triggered by student ID: " + studentId;
 
-        String url = UriComponentsBuilder.fromHttpUrl(notificationServiceUrl + "/notifications/send")
+        String url = UriComponentsBuilder.fromHttpUrl(apiGatewayUrl + "/notifications/send")
                 .queryParam("userId", Long.valueOf(studentId))
                 .queryParam("message", message)
                 .toUriString();
