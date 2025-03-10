@@ -25,9 +25,6 @@ public class AttendanceController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${api.gateway.url}")
-    private String apiGatewayUrl;
-
 
     private Integer getStudentIdFromRequest(HttpServletRequest request) {
         return (Integer) request.getAttribute("userId");
@@ -35,10 +32,9 @@ public class AttendanceController {
 
     @GetMapping("/semester/{semester}")
     public ResponseEntity<?> getAttendanceBySemester(
-            HttpServletRequest request,
+            @RequestAttribute("userId") Integer studentId,
             @PathVariable("semester") Integer semester) {
 
-        Integer studentId = getStudentIdFromRequest(request);
         List<AttendanceRecord> attendanceRecords = attendanceService.getAttendanceByStudentAndSemester(studentId, semester);
 
         if (attendanceRecords.isEmpty()) {
@@ -51,10 +47,9 @@ public class AttendanceController {
 
     @GetMapping("/course/{courseCode}")
     public ResponseEntity<?> getAttendanceByCourse(
-            HttpServletRequest request,
+            @RequestAttribute("userId") Integer studentId,
             @PathVariable("courseCode") String courseCode) {
 
-        Integer studentId = getStudentIdFromRequest(request);
         List<AttendanceRecord> attendanceRecords = attendanceService.getAttendanceByStudentAndCourse(studentId, courseCode);
 
         if (attendanceRecords.isEmpty()) {
@@ -69,13 +64,13 @@ public class AttendanceController {
     public ResponseEntity<String> triggerNotification(@RequestAttribute("userId") Long studentId, @RequestHeader("Authorization") String token) {
         String message = "This is a test notification from Academic Manager, triggered by student ID: " + studentId;
 
-        String url = UriComponentsBuilder.fromHttpUrl(apiGatewayUrl + "/notifications/send")
+        String url = UriComponentsBuilder.fromHttpUrl("http://notification-service/notifications/send")
                 .queryParam("message", message)
                 .toUriString();
 
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + token);
+            headers.set("Authorization", token);
             HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
             String response = restTemplate.postForObject(url, entity, String.class);
