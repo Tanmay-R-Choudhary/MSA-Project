@@ -1,6 +1,6 @@
 spring:
   application:
-    name: user-manager
+    name: notification-service
   cloud:
     config:
       discovery:

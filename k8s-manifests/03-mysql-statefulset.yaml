@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  serviceName: "mysql-service" # Governs this statefulset
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql # Pods selected by this StatefulSet must have this label
+  template:
+    metadata:
+      labels:
+        app: mysql # Label applied to Pods created by this StatefulSet
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        ports:
+        - containerPort: 3306
+          name: mysql
+        env:
+        - name: MYSQL_DATABASE
+          value: "project"
+        # Get the root password from the Secret
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret # Name of the Secret object
+              key: MYSQL_ROOT_PASSWORD # Key within the Secret
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql # Mount the PVC data into the container
+      volumes: # Define the volume based on the PVC
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc # Use the PVC created earlier
+  # Use the PVC defined above for persistent storage
+  # VolumeClaimTemplates are often used here too, but explicit PVC is fine for single replica

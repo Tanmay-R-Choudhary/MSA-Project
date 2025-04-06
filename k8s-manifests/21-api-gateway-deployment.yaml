@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        # IMPORTANT: Use the image name you loaded into Kind
+        image: my-api-gateway:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 9090
+        env:
+        # *** CRITICAL OVERRIDES ***
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          value: "http://eureka-service:8761/eureka/"
+        - name: SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED
+          value: "true"
+        - name: SPRING_CLOUD_CONFIG_DISCOVERY_SERVICE_ID
+          value: "config-server"
+        - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+          value: "true"
+        - name: SPRING_REDIS_HOST
+          value: "redis-service"
+        - name: SPRING_REDIS_PORT
+          value: "6379"
+
+        # **Important Gateway Routing Change**
+        # Your application.properties uses hardcoded localhost URIs.
+        # These need to change to use Eureka-based load balancing (`lb://<service-name>`)
+        # or K8s service discovery (`http://<service-name>:<port>`).
+        # BEST PRACTICE: Configure these routes in your Spring Cloud Config Server repository.
+        # If you update Configs/api-gateway.yml in your Git repo (MSA-Project)
+        # to use `uri: lb://<SERVICE_EUREKA_NAME>` (e.g., lb://USER-MANAGER),
+        # the gateway should pick it up automatically.
+        # Example Config Server change (in Configs/api-gateway.yml or properties):
+        # spring:
+        #   cloud:
+        #     gateway:
+        #       routes:
+        #         - id: UserManager
+        #           uri: lb://USER-MANAGER # Use Eureka service ID (spring.application.name)
+        #           predicates:
+        #             - Path=/auth/**
+        #         - id: AcademicManager
+        #           uri: lb://ACADEMIC-MANAGER
+        #           predicates:
+        #             - Path=/attendance/**
+        #         # ... etc for other routes
+
+        # If you CANNOT change the config server repo right now, you *could* override
+        # them here with environment variables, but it's messy:
+        # - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+        #   value: "lb://USER-MANAGER" # Or "http://user-manager-service:8080"
+        # - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
+        #   value: "lb://ACADEMIC-MANAGER" # Or "http://academic-manager-service:8081"
+        # ... and so on for all routes. (Strongly recommend Config Server approach)
+
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 9090
+          initialDelaySeconds: 40 # Gateway depends on others
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 9090
+          initialDelaySeconds: 80
+          periodSeconds: 20

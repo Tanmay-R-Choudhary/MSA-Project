@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+spec:
+  serviceName: "redis-service" # The governing service for this StatefulSet
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis # Pods selected must have this label
+  template:
+    metadata:
+      labels:
+        app: redis # Label applied to Pods created
+    spec:
+      containers:
+      - name: redis
+        image: redis:7 # Use a specific version or redis:latest
+        ports:
+        - containerPort: 6379
+          name: redis-port
+        # Add basic readiness/liveness probes
+        readinessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        volumeMounts:
+        - name: redis-persistent-storage
+          mountPath: /data # Redis stores its data in /data by default
+      volumes: # Define the volume based on the PVC
+      - name: redis-persistent-storage
+        persistentVolumeClaim:
+          claimName: redis-pvc # Use the PVC created earlier

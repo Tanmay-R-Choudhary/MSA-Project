@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-manager-deployment
+spec:
+  replicas: 1 # Start with 1, can be scaled later
+  selector:
+    matchLabels:
+      app: user-manager
+  template:
+    metadata:
+      labels:
+        app: user-manager
+    spec:
+      containers:
+      - name: user-manager
+        # IMPORTANT: Use the image name you loaded into Kind
+        image: my-user-manager:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        # *** CRITICAL OVERRIDES ***
+        # Use K8s Service names
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-service:3306/project" # Use MySQL service name
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root" # Or from a configmap/secret if not default root
+        # Get DB password from Secret
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          value: "http://eureka-service:8761/eureka/" # Use Eureka service name
+        # Tell Spring Cloud Config client *how* to find the Config Server via Eureka
+        # The bootstrap.yml already configures discovery, so these might reinforce it.
+        - name: SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED
+          value: "true"
+        - name: SPRING_CLOUD_CONFIG_DISCOVERY_SERVICE_ID
+          value: "config-server" # The Eureka registration name of the config server
+        # Often recommended in K8s to register with IP
+        - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+          value: "true"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30 # May need longer if config server/eureka are slow
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20

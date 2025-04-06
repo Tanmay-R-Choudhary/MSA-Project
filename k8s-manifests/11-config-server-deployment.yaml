@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-server-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-server
+  template:
+    metadata:
+      labels:
+        app: config-server
+    spec:
+      containers:
+      - name: config-server
+        # IMPORTANT: Use the image name you loaded into Kind
+        image: my-config-server:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8888
+        env:
+        # *** CRITICAL OVERRIDE ***
+        # Use the K8s Service name for Eureka
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          value: "http://eureka-service:8761/eureka/"
+        - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+          value: "true"
+        # You can also override the Git URI here if needed, e.g.,
+        # - name: SPRING_CLOUD_CONFIG_SERVER_GIT_URI
+        #   value: "your-repo-url"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8888
+          initialDelaySeconds: 25
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8888
+          initialDelaySeconds: 45
+          periodSeconds: 20

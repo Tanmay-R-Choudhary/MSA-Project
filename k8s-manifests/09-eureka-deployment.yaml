@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-server-deployment
+spec:
+  replicas: 1 # Start with 1 replica for Eureka
+  selector:
+    matchLabels:
+      app: eureka-server
+  template:
+    metadata:
+      labels:
+        app: eureka-server
+    spec:
+      containers:
+      - name: eureka-server
+        # IMPORTANT: Use the image name you loaded into Kind
+        image: my-eureka-server:latest
+        # Never pull image from remote if using kind load docker-image
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8761
+        env:
+        # These might be already set correctly in your application.properties,
+        # but explicitly setting them here can prevent issues.
+        - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
+          value: "false"
+        - name: EUREKA_CLIENT_FETCH_REGISTRY
+          value: "false"
+        # Add readiness/liveness probes using Actuator
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness # Adjust path if needed
+            port: 8761
+          initialDelaySeconds: 30 # Time to wait before first probe
+          periodSeconds: 10    # How often to probe
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness # Adjust path if needed
+            port: 8761
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          failureThreshold: 3

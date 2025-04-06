@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: academic-manager-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: academic-manager
+  template:
+    metadata:
+      labels:
+        app: academic-manager
+    spec:
+      containers:
+      - name: academic-manager
+        # IMPORTANT: Use the image name you loaded into Kind
+        image: my-academic-manager:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8081
+        env:
+        # *** CRITICAL OVERRIDES ***
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-service:3306/project"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          value: "http://eureka-service:8761/eureka/"
+        - name: SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED
+          value: "true"
+        - name: SPRING_CLOUD_CONFIG_DISCOVERY_SERVICE_ID
+          value: "config-server"
+        - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+          value: "true"
+        readinessProbe:
+          # ... (configure probes similar to user-manager on port 8081)
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          # ... (configure probes similar to user-manager on port 8081)
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8081
+          initialDelaySeconds: 60
+          periodSeconds: 20
