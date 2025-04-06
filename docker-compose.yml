@@ -1,0 +1,185 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=project
+    networks:
+      - spring-cloud-network
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  # Configuration Server
+  config-server:
+    build: ./ConfigServer # Path to the config-server directory with its Dockerfile
+    container_name: config-server
+    ports:
+      - "8888:8888" # Map host port 8888 to container port 8888
+    networks:
+      - spring-cloud-network
+    healthcheck: # Optional but recommended
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  # Discovery Server (Eureka)
+  discovery-server:
+    build: ./Eureka
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - spring-cloud-network
+    depends_on: # Wait for config-server to be healthy (basic dependency)
+      mysql-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s # Give Eureka more time
+
+  # API Gateway
+  api-gateway:
+    build: ./api_gateway
+    container_name: api-gateway
+    ports:
+      - "9090:9090" # Expose the gateway externally
+    networks:
+      - spring-cloud-network
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # Service A
+  service-a:
+    build: ./UserManager
+    container_name: user-manager
+    ports:
+      - "8080:8080"
+    networks:
+      - spring-cloud-network
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/project
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      # - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"] # Port from service-a.yml
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # Service B (Repeat structure for B, C, D)
+  service-b:
+    build: ./GradeManager
+    container_name: grade-manager
+    ports:
+      - "8082:8082"
+    networks:
+      - spring-cloud-network
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/project
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      # - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"] # Port from service-a.yml
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # Service C
+  service-c:
+    build: ./NotificationService
+    container_name: notification-service
+    ports:
+      - "8083:8083"
+    networks:
+      - spring-cloud-network
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/project
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      # - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"] # Port from service-a.yml
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # Service D
+  service-d:
+    build: ./AcademicManager
+    container_name: academic-manager
+    ports:
+      - "8081:8081"
+    networks:
+      - spring-cloud-network
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/project
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      # - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"] # Port from service-a.yml
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+# Define the network
+networks:
+  spring-cloud-network:
+    driver: bridge # Default network driver
