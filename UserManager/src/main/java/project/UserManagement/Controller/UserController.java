@@ -2,6 +2,7 @@ package project.UserManagement.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import project.UserManagement.Entity.User;
 import project.UserManagement.Security.JwtUtil;
 import project.UserManagement.Service.UserService;
 
+@RefreshScope
 @RestController
 @RequestMapping("/auth")
 public class UserController {

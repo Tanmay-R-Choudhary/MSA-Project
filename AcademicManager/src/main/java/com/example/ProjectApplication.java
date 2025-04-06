@@ -7,8 +7,8 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
-@SpringBootApplication
 @EnableDiscoveryClient
+@SpringBootApplication
 public class ProjectApplication {
 
 	public static void main(String[] args) {

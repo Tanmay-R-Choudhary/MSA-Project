@@ -1,0 +1,16 @@
+com\example\AcademicManagement\Service\CourseServiceImpl.class
+com\example\AcademicManagement\Service\AttendanceService.class
+com\example\AcademicManagement\DTO\CourseDTO.class
+com\example\AcademicManagement\DTO\AttendanceRecordDTO.class
+com\example\AcademicManagement\Security\JwtValidator.class
+com\example\AcademicManagement\Entity\Course.class
+com\example\AcademicManagement\Entity\AttendanceRecord.class
+com\example\AcademicManagement\Repository\CourseRepository.class
+com\example\AcademicManagement\Service\AttendanceServiceImpl.class
+com\example\ProjectApplication.class
+com\example\AcademicManagement\Repository\AttendanceRecordRepository.class
+com\example\AcademicManagement\Config\WebConfig.class
+com\example\AcademicManagement\Controller\CourseController.class
+com\example\AcademicManagement\Security\JwtInterceptor.class
+com\example\AcademicManagement\Service\CourseService.class
+com\example\AcademicManagement\Controller\AttendanceController.class

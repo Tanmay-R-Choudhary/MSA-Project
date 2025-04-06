@@ -1,0 +1,16 @@
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Config\WebConfig.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Controller\AttendanceController.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Controller\CourseController.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\DTO\AttendanceRecordDTO.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\DTO\CourseDTO.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Entity\AttendanceRecord.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Entity\Course.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Repository\AttendanceRecordRepository.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Repository\CourseRepository.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Security\JwtInterceptor.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Security\JwtValidator.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Service\AttendanceService.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Service\AttendanceServiceImpl.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Service\CourseService.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\AcademicManagement\Service\CourseServiceImpl.java
+C:\Users\tanma\Development\MSA-Project\AcademicManager\src\main\java\com\example\ProjectApplication.java

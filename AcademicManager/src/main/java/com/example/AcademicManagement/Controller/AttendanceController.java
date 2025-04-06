@@ -4,6 +4,7 @@ import com.example.AcademicManagement.Entity.AttendanceRecord;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder; // Import UriComponent
 
 import java.util.List;
 
+@RefreshScope
 @RestController
 @RequestMapping("/attendance")
 public class AttendanceController {

@@ -5,6 +5,7 @@ import GradeManager.GradeManager.Service.StudentGradeService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
+@RefreshScope
 @RestController
 @RequestMapping("/grades")
 public class StudentGradeController {
@@ -25,8 +27,16 @@ public class StudentGradeController {
     @Value("${api.gateway.url}")
     private String apiGatewayUrl;
 
+    @Value("${some.property}")
+    private String configTest;
+
     private Integer getSapIdFromRequest(HttpServletRequest request) {
         return (Integer) request.getAttribute("userId");
+    }
+
+    @GetMapping("/configtest")
+    public String configTest() {
+        return configTest;
     }
 
     @GetMapping("/semester/{semester}")
