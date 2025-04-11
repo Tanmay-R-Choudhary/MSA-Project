@@ -35,6 +35,20 @@ services:
       timeout: 5s
       retries: 5
 
+  # Redis
+  redis:
+    image: redis:6.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - spring-cloud-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5  
+
   # Configuration Server
   config-server:
     build: ./ConfigServer # Path to the config-server directory with its Dockerfile
@@ -80,10 +94,14 @@ services:
       - spring-cloud-network
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - SPRING_REDIS_HOST=redis  # Tell Spring Boot to connect to the 'redis' service name
+      - SPRING_REDIS_PORT=6379   # Explicitly set port (though it's the default)
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
@@ -218,3 +236,4 @@ networks:
 # Define the volumes
 volumes:
   mysql-data:
+  redis-data:
