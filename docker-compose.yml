@@ -97,15 +97,13 @@ services:
       - spring-cloud-network
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
       interval: 30s
