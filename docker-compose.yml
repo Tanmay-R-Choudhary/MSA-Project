@@ -10,6 +10,8 @@ services:
       - RABBITMQ_DEFAULT_PASS=guest
     networks:
       - spring-cloud-network
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
@@ -37,7 +39,7 @@ services:
 
   # Redis
   redis:
-    image: redis:6.2
+    image: redis:7
     container_name: redis
     ports:
       - "6379:6379"
@@ -47,7 +49,8 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 5  
+      retries: 5
+      start_period: 10s
 
   # Configuration Server
   config-server:
@@ -94,15 +97,15 @@ services:
       - spring-cloud-network
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-      - SPRING_REDIS_HOST=redis  # Tell Spring Boot to connect to the 'redis' service name
-      - SPRING_REDIS_PORT=6379   # Explicitly set port (though it's the default)
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
       redis:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
       interval: 30s
@@ -237,3 +240,4 @@ networks:
 volumes:
   mysql-data:
   redis-data:
+  rabbitmq-data: {}
