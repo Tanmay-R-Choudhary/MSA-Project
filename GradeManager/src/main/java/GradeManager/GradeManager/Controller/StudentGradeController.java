@@ -1,6 +1,7 @@
 package GradeManager.GradeManager.Controller;
 
 import GradeManager.GradeManager.DTO.CourseGradesDTO;
+import GradeManager.GradeManager.Service.NotificationService;
 import GradeManager.GradeManager.Service.StudentGradeService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -22,10 +22,10 @@ public class StudentGradeController {
     private StudentGradeService studentGradeService;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private NotificationService notificationService;
 
-    @Value("${api.gateway.url}")
-    private String apiGatewayUrl;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Value("${some.property}")
     private String configTest;
@@ -77,16 +77,13 @@ public class StudentGradeController {
         Integer studentId = getSapIdFromRequest(request);
         String message = "This is a test notification from Academic Manager, triggered by student ID: " + studentId;
 
-        String url = UriComponentsBuilder.fromHttpUrl(apiGatewayUrl + "/notifications/send")
-                .queryParam("userId", Long.valueOf(studentId))
-                .queryParam("message", message)
-                .toUriString();
-
         try {
-            String response = restTemplate.postForObject(url, null, String.class);
+            // Use the circuit breaker protected service
+            String response = notificationService.sendNotification(request, message);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Error sending notification: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Error processing notification request: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

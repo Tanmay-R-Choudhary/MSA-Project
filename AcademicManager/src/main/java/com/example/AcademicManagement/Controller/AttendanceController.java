@@ -1,6 +1,7 @@
 package com.example.AcademicManagement.Controller;
 
 import com.example.AcademicManagement.Entity.AttendanceRecord;
+import com.example.AcademicManagement.Service.NotificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +26,14 @@ public class AttendanceController {
     private AttendanceService attendanceService;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private RestTemplate restTemplate;
+
+    private Integer getSapIdFromRequest(HttpServletRequest request) {
+        return (Integer) request.getAttribute("userId");
+    }
 
 
     private Integer getStudentIdFromRequest(HttpServletRequest request) {
@@ -63,22 +71,17 @@ public class AttendanceController {
     }
 
     @PostMapping("/triggerNotification")
-    public ResponseEntity<String> triggerNotification(@RequestAttribute("userId") Long studentId, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<String> triggerNotification(HttpServletRequest request) {
+        Integer studentId = getSapIdFromRequest(request);
         String message = "This is a test notification from Academic Manager, triggered by student ID: " + studentId;
 
-        String url = UriComponentsBuilder.fromHttpUrl("http://notification-service/notifications/send")
-                .queryParam("message", message)
-                .toUriString();
-
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", token);
-            HttpEntity<String> entity = new HttpEntity<>(null, headers);
-
-            String response = restTemplate.postForObject(url, entity, String.class);
+            // Use the circuit breaker protected service
+            String response = notificationService.sendNotification(request, message);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Error sending notification: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Error processing notification request: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

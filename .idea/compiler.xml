@@ -11,16 +11,16 @@
         <module name="api_gateway" />
         <module name="ConfigServer" />
       </profile>
-      <profile name="Annotation profile for notification_test" enabled="true">
+      <profile name="Annotation profile for Project" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
         </processorPath>
-        <module name="NotificationService" />
         <module name="AcademicManager" />
         <module name="GradeManager" />
+        <module name="NotificationService" />
         <module name="UserManager" />
       </profile>
     </annotationProcessing>

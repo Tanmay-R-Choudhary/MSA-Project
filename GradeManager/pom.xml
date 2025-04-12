@@ -86,6 +86,17 @@
 			<artifactId>spring-cloud-starter-config</artifactId> <!-- Config Client -->
 		</dependency>
 		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-spring-boot3</artifactId>
+			<!-- Version managed by Spring Boot parent/Spring Cloud BOM -->
+			<!-- Make sure this aligns with your Spring Boot/Cloud version if not managed -->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+			<!-- Required for annotation-based Resilience4j aspects -->
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
